@@ -1,0 +1,128 @@
+using UnityEngine;
+
+public class SonarEffect : MonoBehaviour {
+
+    MeshRenderer[] meshes;
+    SkinnedMeshRenderer[] skinnedMeshes; 
+
+    public float ringWidth;
+    public float targetDistance;
+    public float speed;
+
+    public bool isPaused;
+    int ringCount;
+    int ringPtr;
+
+    float[] mins;
+    float[] maxs;
+    float[] counters;
+    int[] counterFlag;
+
+    //sounds
+    GameObject SoundManager;
+    SoundManager soundScript;
+
+    // Use this for initialization
+	void Start () {
+        meshes = GameObject.FindObjectsOfType<MeshRenderer>();
+        skinnedMeshes = GameObject.FindObjectsOfType<SkinnedMeshRenderer>();
+
+        isPaused = false;
+
+        mins = new float[5];
+        maxs = new float[5];
+        counters = new float[5];
+        counterFlag = new int[5];
+
+        SoundManager = GameObject.FindGameObjectWithTag("SoundManager");
+        soundScript = SoundManager.GetComponent<SoundManager>();
+    }
+	
+	// Update is called once per frame
+	void Update () {
+
+        if(Input.GetButtonDown("Fire2") && isPaused == false)
+        {
+            counterFlag[ringPtr] = 1;
+
+            ringPtr += 1;
+
+            
+
+            if (ringPtr >= 5)
+            {
+                ringPtr = 0;
+            }
+        }
+
+        if (Input.GetMouseButtonDown(1) && isPaused == false)
+        {
+            soundScript.PlaySonarSound(0);
+        }
+
+        if (isPaused == false)
+        {
+            RunSonar();
+        }
+	}
+
+
+    private void RunSonar()
+    {
+
+        for (int i = 0; i < counters.Length; i++)
+        {
+            counters[i] += speed * Time.deltaTime * counterFlag[i];
+
+            if (counters[i] > targetDistance)
+            {
+                counters[i] = 0;
+                counterFlag[i] = 0;
+            }
+        }
+        UpdateDissolveDistance();
+    }
+
+
+    private void UpdateDissolveDistance()
+    {
+        //float min = targetDistance - (ringWidth / 2);
+        //float max = targetDistance + (ringWidth / 2);
+
+        for (int i = 0; i < counters.Length; i++)
+        {
+            if (counters[i] > 0)
+            {
+                mins[i] = counters[i] - (ringWidth / 2);
+                maxs[i] = counters[i] + (ringWidth / 2);
+            }
+            else
+            {
+                mins[i] = 0;
+                maxs[i] = 0;
+            }
+        }
+
+        
+        
+        //updates the dissolve distance for all objects that have the associated shader
+        for (int i = 0; i < meshes.Length; i++)
+        {
+            Material mat = meshes[i].material;
+
+            mat.SetFloatArray("DissolveMins", mins);
+            mat.SetFloatArray("DissolveMaxs", maxs);
+            mat.SetVector("_WorldPos", transform.position);
+        }
+
+        for (int i = 0; i < skinnedMeshes.Length; i++)
+        {
+            Material mat = skinnedMeshes[i].material;
+
+            mat.SetFloatArray("DissolveMins", mins);
+            mat.SetFloatArray("DissolveMaxs", maxs);
+            mat.SetVector("_WorldPos", transform.position);
+        }
+    }
+
+}
