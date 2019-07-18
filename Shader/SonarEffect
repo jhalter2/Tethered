@@ -1,3 +1,11 @@
+//This is the script that interacts with the shader. This script 
+//has a few primary uses.
+//1. update the number of active rings when right click is pressed
+//2. maintain a collection of maxs and a collection of mins
+//for each of the 5 available rings
+//3. update the shader with the max and min values that are stored
+//for the shader to properly hide and render everything
+
 using UnityEngine;
 
 public class SonarEffect : MonoBehaviour {
@@ -22,7 +30,6 @@ public class SonarEffect : MonoBehaviour {
     GameObject SoundManager;
     SoundManager soundScript;
 
-    // Use this for initialization
 	void Start () {
         meshes = GameObject.FindObjectsOfType<MeshRenderer>();
         skinnedMeshes = GameObject.FindObjectsOfType<SkinnedMeshRenderer>();
@@ -64,7 +71,7 @@ public class SonarEffect : MonoBehaviour {
         {
             RunSonar();
         }
-	}
+    }
 
 
     private void RunSonar()
